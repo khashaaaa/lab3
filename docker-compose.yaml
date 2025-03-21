@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      target: production
+    container_name: lab3-api
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+  benchmark:
+    build:
+      context: .
+      target: benchmark
+    container_name: lab3-benchmark
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./benchmark-results:/benchmark/results
+    command: -c "echo 'Waiting for API to be ready...' && sleep 5 && ./benchmark-commands.sh"
+    network_mode: "host"
